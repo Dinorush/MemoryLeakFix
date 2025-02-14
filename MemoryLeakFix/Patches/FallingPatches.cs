@@ -36,6 +36,7 @@ namespace MemoryLeakFix.Patches
         }
 
         [HarmonyPatch(typeof(BulletWeapon), nameof(BulletWeapon.DropMagazine))]
+        [HarmonyWrapSafe]
         [HarmonyPostfix]
         private static void DropMag(BulletWeapon __instance)
         {
