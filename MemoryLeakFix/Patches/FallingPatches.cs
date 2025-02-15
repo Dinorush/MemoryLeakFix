@@ -43,6 +43,7 @@ namespace MemoryLeakFix.Patches
             var pool = __instance.m_magDropPool;
             if (pool == null) return;
 
+            FallingObjectHandler.AddPool(pool);
             var go = pool.m_freeInstances.Count > 0 ? pool.m_freeInstances.First.Value : pool.m_usedInstances.First.Value;
             FallingObjectHandler.AddObject(go, pool.Return);
         }

@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MemoryLeakFix.Handler
@@ -25,6 +26,7 @@ namespace MemoryLeakFix.Handler
         private const float UpdateInterval = 1f;
 
         private readonly LinkedList<(GameObject go, Action<GameObject> destroyFunc)> _objects = new();
+        private readonly Dictionary<IntPtr, ObjectPooler.Pool> _pools = new();
         private float _nextUpdateTime;
         private LinkedListNode<(GameObject go, Action<GameObject> destroyFunc)>? _currentNode;
 
@@ -34,6 +36,7 @@ namespace MemoryLeakFix.Handler
         }
 
         public static void AddObject(GameObject go, Action<GameObject>? destroyFunc = null) => Current._objects.AddLast((go, destroyFunc ?? BasicDestroy));
+        public static void AddPool(ObjectPooler.Pool pool) => Current._pools.TryAdd(pool.Pointer, pool);
 
         private void Update()
         {
@@ -59,12 +62,12 @@ namespace MemoryLeakFix.Handler
 
         private void OnClear()
         {
-            foreach ((var go, var destroyFunc) in _objects)
+            foreach ((var ptr, var pool) in _pools.ToArray())
             {
-                if (go != null)
-                {
-                    destroyFunc.Invoke(go);
-                }
+                if (pool == null)
+                    _pools.Remove(ptr);
+                else
+                    pool.Clear();
             }
             _objects.Clear();
             _currentNode = null;
