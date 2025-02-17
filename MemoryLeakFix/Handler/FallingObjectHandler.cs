@@ -25,10 +25,10 @@ namespace MemoryLeakFix.Handler
         private const int MaxSteps = 20;
         private const float UpdateInterval = 1f;
 
-        private readonly LinkedList<(GameObject go, Action<GameObject> destroyFunc)> _objects = new();
+        private readonly LinkedList<(GameObject? go, Action<GameObject> destroyFunc)> _objects = new();
         private readonly Dictionary<IntPtr, ObjectPooler.Pool> _pools = new();
         private float _nextUpdateTime;
-        private LinkedListNode<(GameObject go, Action<GameObject> destroyFunc)>? _currentNode;
+        private LinkedListNode<(GameObject? go, Action<GameObject> destroyFunc)>? _currentNode;
 
         public void Awake()
         {
