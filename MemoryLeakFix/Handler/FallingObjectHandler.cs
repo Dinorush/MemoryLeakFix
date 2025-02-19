@@ -25,17 +25,17 @@ namespace MemoryLeakFix.Handler
         private const int MaxSteps = 20;
         private const float UpdateInterval = 1f;
 
-        private readonly LinkedList<(GameObject? go, Action<GameObject> destroyFunc)> _objects = new();
+        private readonly LinkedList<(GameObject? go, Action<GameObject> destroyFunc, Func<bool>? checkFunc)> _objects = new();
         private readonly Dictionary<IntPtr, ObjectPooler.Pool> _pools = new();
         private float _nextUpdateTime;
-        private LinkedListNode<(GameObject? go, Action<GameObject> destroyFunc)>? _currentNode;
+        private LinkedListNode<(GameObject? go, Action<GameObject> destroyFunc, Func<bool>? checkFunc)>? _currentNode;
 
         public void Awake()
         {
             Current = this;
         }
 
-        public static void AddObject(GameObject go, Action<GameObject>? destroyFunc = null) => Current._objects.AddLast((go, destroyFunc ?? BasicDestroy));
+        public static void AddObject(GameObject go, Action<GameObject>? destroyFunc = null, Func<bool>? checkFunc = null) => Current._objects.AddLast((go, destroyFunc ?? BasicDestroy, checkFunc));
         public static void AddPool(ObjectPooler.Pool pool) => Current._pools.TryAdd(pool.Pointer, pool);
 
         private void Update()
@@ -46,7 +46,7 @@ namespace MemoryLeakFix.Handler
             for (int steps = 0; steps < MaxSteps && _currentNode != null; steps++)
             {
                 GameObject? go = _currentNode.Value.go;
-                if (go != null && go.transform.position.y < -10000f)
+                if (go != null && (go.transform.position.y < -10000f || _currentNode.Value.checkFunc?.Invoke() == true))
                 {
                     _currentNode.Value.destroyFunc.Invoke(go);
                     _objects.Remove(_currentNode);

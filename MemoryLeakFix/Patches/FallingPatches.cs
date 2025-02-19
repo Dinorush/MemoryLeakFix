@@ -32,7 +32,7 @@ namespace MemoryLeakFix.Patches
         [HarmonyPostfix]
         private static void GlueGunSpawn(GlueGunProjectile __instance)
         {
-            FallingObjectHandler.AddObject(__instance.gameObject, (go) => ProjectileManager.WantToDestroyGlue(go.GetComponent<GlueGunProjectile>().SyncID));
+            FallingObjectHandler.AddObject(__instance.gameObject, (go) => ProjectileManager.WantToDestroyGlue(go.GetComponent<GlueGunProjectile>().SyncID), () => __instance.m_sound == null);
         }
 
         [HarmonyPatch(typeof(BulletWeapon), nameof(BulletWeapon.DropMagazine))]
