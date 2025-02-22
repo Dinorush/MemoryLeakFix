@@ -66,8 +66,16 @@ namespace MemoryLeakFix.Handler
             {
                 if (pool == null)
                     _pools.Remove(ptr);
-                else
-                    pool.Clear();
+                else if(pool.m_usedInstances.Count > 0)
+                {
+                    GameObject[] mags = new GameObject[pool.m_usedInstances.Count];
+                    var node = pool.m_usedInstances.First;
+                    for (int i = 0; i < pool.m_usedInstances.Count; i++, node = node.Next)
+                        mags[i] = node.Value;
+
+                    foreach (var mag in mags)
+                        pool.Return(mag);
+                }
             }
             _objects.Clear();
             _currentNode = null;
