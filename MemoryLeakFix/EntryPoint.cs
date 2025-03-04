@@ -23,7 +23,8 @@ namespace MemoryLeakFix
 
         private void OnLevelCleanup()
         {
-            Decay.s_poolHandle.Clear();
+            if (Decay.s_poolHandle != null)
+                Decay.s_poolHandle.Clear();
             FallingObjectHandler.Clear();
         }
 
