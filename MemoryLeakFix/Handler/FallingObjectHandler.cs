@@ -46,6 +46,7 @@ namespace MemoryLeakFix.Handler
             for (int steps = 0; steps < MaxSteps && _currentNode != null; steps++)
             {
                 GameObject? go = _currentNode.Value.go;
+                var nextNode = _currentNode.Next;
                 if (go != null && go.transform.position.y < -10000f)
                 {
                     _currentNode.Value.destroyFunc.Invoke(go);
@@ -53,7 +54,7 @@ namespace MemoryLeakFix.Handler
                 }
                 else if (go == null || !go.active)
                     _objects.Remove(_currentNode);
-                _currentNode = _currentNode.Next;
+                _currentNode = nextNode;
             }
 
             if (_currentNode == null)
