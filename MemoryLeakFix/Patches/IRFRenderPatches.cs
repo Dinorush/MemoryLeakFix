@@ -7,7 +7,8 @@ namespace MemoryLeakFix.Patches
     [HarmonyPatch]
     internal static class IRFRenderPatches
     {
-        public static Camera DrawMeshCamera = null!;
+        private static Camera _drawMeshCamera = null!;
+        private static bool _overrideCamera = false;
 
         [HarmonyPatch(typeof(Graphics), nameof(Graphics.DrawMeshInstancedIndirect), new Type[]
             {
@@ -30,15 +31,23 @@ namespace MemoryLeakFix.Patches
         private static void FixCamera(ref Camera camera)
         {
             // Only called by IRFs with null camera, so safe to always replace
-            camera = DrawMeshCamera;
+            if (_overrideCamera)
+                camera = _drawMeshCamera;
         }
 
-        [HarmonyPatch(typeof(PreLitVolume), nameof(PreLitVolume.Setup))]
+        [HarmonyPatch(typeof(FPSCamera), nameof(FPSCamera.OnControllerEnable))]
         [HarmonyPostfix]
-        private static void SetCamera(PreLitVolume __instance)
+        private static void EnableCamera(FPSCamera __instance)
         {
-            DrawMeshCamera = __instance.m_camera;
+            _drawMeshCamera = __instance.m_camera;
+            _overrideCamera = true;
+        }
+
+        [HarmonyPatch(typeof(FPSCamera), nameof(FPSCamera.OnControllerDisable))]
+        [HarmonyPostfix]
+        private static void DisableCamera()
+        {
+            _overrideCamera = false;
         }
     }
-
 }

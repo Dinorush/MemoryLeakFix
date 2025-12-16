@@ -2,8 +2,6 @@
 using FX_EffectSystem;
 using HarmonyLib;
 using IRF;
-using MemoryLeakFix.Utils;
-using System.Diagnostics;
 using UnityEngine;
 
 namespace MemoryLeakFix.Patches

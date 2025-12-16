@@ -5,7 +5,7 @@ using MemoryLeakFix.Handler;
 
 namespace MemoryLeakFix
 {
-    [BepInPlugin("Dinorush." + MODNAME, MODNAME, "1.3.0")]
+    [BepInPlugin("Dinorush." + MODNAME, MODNAME, "1.3.1")]
     [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
     internal sealed class EntryPoint : BasePlugin
     {
