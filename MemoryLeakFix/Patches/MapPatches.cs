@@ -7,11 +7,11 @@ using UnityEngine;
 namespace MemoryLeakFix.Patches
 {
     [HarmonyPatch]
-    internal static class DisinfectPatches
+    internal static class MapPatches
     {
         public static void OnCleanup() => _routineActive = false;
 
-        private const float UpdateInterval = 0.5f;
+        private const float UpdateInterval = 0.25f;
         private static float _nextAllowedTime = 0f;
         private static bool _routineActive = false;
 
@@ -19,9 +19,9 @@ namespace MemoryLeakFix.Patches
         [HarmonyPrefix]
         private static bool Pre_UpdateData(CM_PageMap __instance)
         {
-            if (_routineActive) return false;
+            if (_routineActive || !__instance.m_isActive) return false;
 
-            float time = Time.realtimeSinceStartup;
+            float time = Clock.Time;
             if (time < _nextAllowedTime)
             {
                 _routineActive = true;
