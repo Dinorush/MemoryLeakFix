@@ -1,6 +1,6 @@
 ﻿using BepInEx.Logging;
 
-namespace MemoryLeakFix.Utils
+namespace MemoryLeakFix
 {
     internal static class DinoLogger
     {
