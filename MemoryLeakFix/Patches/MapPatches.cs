@@ -14,17 +14,23 @@ namespace MemoryLeakFix.Patches
         private const float UpdateInterval = 0.25f;
         private static float _nextAllowedTime = 0f;
         private static bool _routineActive = false;
+        private static bool _forceAllow = false;
 
         [HarmonyPatch(typeof(CM_PageMap), nameof(CM_PageMap.UpdatePlayerData))]
         [HarmonyPrefix]
         private static bool Pre_UpdateData(CM_PageMap __instance)
         {
-            if (_routineActive || !__instance.m_isActive) return false;
+            if (_forceAllow)
+            {
+                _forceAllow = false;
+                return true;
+            }
+
+            if (_routineActive) return false;
 
             float time = Clock.Time;
             if (time < _nextAllowedTime)
             {
-                _routineActive = true;
                 CoroutineManager.StartCoroutine(DelayedApply(__instance).WrapToIl2Cpp());
                 return false;
             }
@@ -35,9 +41,17 @@ namespace MemoryLeakFix.Patches
 
         private static IEnumerator DelayedApply(CM_PageMap __instance)
         {
+            _routineActive = true;
             yield return new WaitForSeconds(UpdateInterval);
             _routineActive = false;
             __instance.UpdatePlayerData();
+        }
+
+        [HarmonyPatch(typeof(CM_PageMap), nameof(CM_PageMap.OnEnable))]
+        [HarmonyPrefix]
+        private static void Pre_Enable()
+        {
+            _forceAllow = true;
         }
     }
 }
