@@ -2,6 +2,7 @@
 using FX_EffectSystem;
 using HarmonyLib;
 using IRF;
+using LevelGeneration;
 using UnityEngine;
 
 namespace MemoryLeakFix.Patches
@@ -47,6 +48,24 @@ namespace MemoryLeakFix.Patches
                 Object.Destroy(light.gameObject);
             FX_Manager.s_activeLights.Clear();
             FX_Manager.s_freeLights.Clear();
+        }
+
+
+        [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.OnDestroy))]
+        [HarmonyPrefix]
+        private static void Pre_DestroyTerminal(LG_ComputerTerminal __instance)
+        {
+            var ptr = __instance.Pointer;
+            var delList = LG_Factory.OnFactoryBuildDone.GetInvocationList();
+            for (int i = delList.Count - 1; i >= 0; i--)
+            {
+                var del = delList[i];
+                if (del.Target != null && del.Target.Pointer == ptr)
+                {
+                    LG_Factory.OnFactoryBuildDone = LG_Factory.OnFactoryBuildDone.RemoveImpl(del).Cast<Il2CppSystem.Action>();
+                    return;
+                }
+            }
         }
 
         [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
